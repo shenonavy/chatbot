@@ -1,0 +1,41 @@
+import { useUploader } from '@/hook/use-uploader';
+import Dropzone from 'react-dropzone';
+
+export const Uploader = () => {
+    const { files, handleDrop, handleRemove } = useUploader();
+
+    return (
+        <div>
+            <Dropzone onDrop={handleDrop}>
+                {({ getRootProps, getInputProps }) => (
+                    <section>
+                        <div
+                            {...getRootProps()}
+                            className="h-[200px] border-2 border-dotted border-blue-500 rounded-md flex items-center justify-center text-center p-4"
+                        >
+                            <input {...getInputProps()} />
+                            <p className="text-gray-600">Drag & drop some files here, or click to select files</p>
+                        </div>
+                    </section>
+                )}
+            </Dropzone>
+            {files.length > 0 && (
+                <ul className="space-y-2 mt-2">
+                    {files.map((file, index) => (
+                        <li key={index} className="flex justify-between items-center border p-2 rounded">
+                            <span className="text-sm">{file.name}</span>
+                            <button
+                                onClick={() => handleRemove(file)}
+                                className="text-red-500 hover:text-red-700 text-sm"
+                            >
+                                Remove
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
+export default Uploader;

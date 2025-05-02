@@ -3,10 +3,20 @@ import { ChatType } from '@/enum';
 import { useChat } from '@/hook/use-chat';
 import { IChatResponse } from '@/models';
 import { Typewriter } from 'react-simple-typewriter';
+import { SendHorizontal, Upload } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/atoms/dialog';
+import { Uploader } from '@/components';
 
 export default function Home() {
     const bottomRef = useRef<HTMLDivElement>(null);
-    const { input, chats, isLoading, setInput, onSubmit } = useChat();
+    const { input, chats, isLoading, open, setOpen, setInput, onSubmit } = useChat();
 
     useEffect(() => {
         const container = bottomRef.current;
@@ -58,14 +68,47 @@ export default function Home() {
                     onInput={e => setInput(e.currentTarget.value)}
                     onKeyDown={handleKeyDown}
                 />
-                <button
-                    disabled={isLoading}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                    onClick={() => onSubmit()}
-                >
-                    Send
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        disabled={isLoading}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                        onClick={() => onSubmit()}
+                    >
+                        <SendHorizontal />
+                    </button>
+                    <button
+                        disabled={isLoading}
+                        className="bg-green-600 hover:bg-green-800 text-white px-4 py-2 rounded-md"
+                        onClick={() => setOpen(true)}
+                    >
+                        <Upload />
+                    </button>
+                </div>
             </div>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="max-w-[unset] w-[580px]" onInteractOutside={event => event.preventDefault()}>
+                    <DialogHeader className="px-0">
+                        <DialogTitle asChild>
+                            <div className="px-4 flex gap-2">
+                                <p className="text-lg font-semibold text-gray-700">Upload your document</p>
+                            </div>
+                        </DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription asChild>
+                        <div className="px-4 flex flex-col gap-y-4 h-[351px] overflow-y-auto">
+                            <Uploader />
+                        </div>
+                    </DialogDescription>
+                    <DialogFooter>
+                        <button
+                            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                            onClick={() => setOpen(true)}
+                        >
+                            Upload
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

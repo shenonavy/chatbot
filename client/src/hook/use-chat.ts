@@ -22,6 +22,7 @@ const executeChat = async (req: IChatRequest) => {
 export const useChat = () => {
     const [chats, setChat] = useState<IChatResponse[]>([]);
     const [input, setInput] = useState<string>('');
+    const [open, setOpen] = useState<boolean>(false);
 
     const { mutate, isLoading } = useMutation((data: IChatRequest) => executeChat(data), {
         onSuccess: response => {
@@ -42,6 +43,8 @@ export const useChat = () => {
         isLoading,
         chats,
         input,
+        open,
+        setOpen,
         setInput,
         onSubmit,
     };
