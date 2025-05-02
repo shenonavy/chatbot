@@ -1,12 +1,23 @@
-import { useUploader } from '@/hook/use-uploader';
 import Dropzone from 'react-dropzone';
 
-export const Uploader = () => {
-    const { files, handleDrop, handleRemove } = useUploader();
+export interface UploaderProps {
+    files: File[];
+    uploading: boolean;
+    handleDrop: (acceptedFiles: File[]) => void;
+    handleRemove: (fileToRemove: File) => void;
+}
+
+export const Uploader = (props: UploaderProps) => {
+    const { files, uploading, handleDrop, handleRemove } = props;
 
     return (
         <div>
-            <Dropzone onDrop={handleDrop}>
+            <Dropzone
+                onDrop={handleDrop}
+                accept={{
+                    'application/pdf': ['.pdf'],
+                }}
+            >
                 {({ getRootProps, getInputProps }) => (
                     <section>
                         <div
@@ -25,6 +36,7 @@ export const Uploader = () => {
                         <li key={index} className="flex justify-between items-center border p-2 rounded">
                             <span className="text-sm">{file.name}</span>
                             <button
+                                disabled={uploading}
                                 onClick={() => handleRemove(file)}
                                 className="text-red-500 hover:text-red-700 text-sm"
                             >

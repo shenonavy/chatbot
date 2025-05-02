@@ -16,7 +16,20 @@ import { Uploader } from '@/components';
 
 export default function Home() {
     const bottomRef = useRef<HTMLDivElement>(null);
-    const { input, chats, isLoading, open, setOpen, setInput, onSubmit } = useChat();
+    const {
+        input,
+        chats,
+        isLoading,
+        open,
+        files,
+        uploading,
+        setOpen,
+        setInput,
+        onSubmit,
+        handleDrop,
+        handleRemove,
+        handleUpload,
+    } = useChat();
 
     useEffect(() => {
         const container = bottomRef.current;
@@ -96,15 +109,21 @@ export default function Home() {
                     </DialogHeader>
                     <DialogDescription asChild>
                         <div className="px-4 flex flex-col gap-y-4 h-[351px] overflow-y-auto">
-                            <Uploader />
+                            <Uploader
+                                files={files}
+                                uploading={uploading}
+                                handleDrop={handleDrop}
+                                handleRemove={handleRemove}
+                            />
                         </div>
                     </DialogDescription>
                     <DialogFooter>
                         <button
+                            disabled={uploading}
                             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                            onClick={() => setOpen(true)}
+                            onClick={async () => await handleUpload()}
                         >
-                            Upload
+                            {uploading ? 'Uploading' : 'Upload'}
                         </button>
                     </DialogFooter>
                 </DialogContent>

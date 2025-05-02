@@ -1,15 +1,18 @@
-from fastapi import FastAPI
+from typing import List
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
 from models.llm import get_llm
-from utils import prompt as prompt_template
+from utils import prompt as prompt_template, loader as document_loader
 from entity.chat_request import ChatRequest
 from database import vectorstore
 from logger import logging
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.runnables import RunnableMap
+import shutil
+import uuid
 import os
 
 load_dotenv()
@@ -34,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+TEMP_DIR = "./temp_files"
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 history = []
 
@@ -123,3 +129,40 @@ async def simple_rag(req: ChatRequest):
         response_data["response"] = str(e)
         response_data["status"] = "fail"
         return response_data
+    
+@app.post("/api/upload")
+async def upload_file(files: List[UploadFile] = File(...)):
+    response_data = []
+
+    for file in files:
+        if not file.filename.endswith(".pdf"):
+            continue
+
+        unique_filename = f"{uuid.uuid4()}.pdf"
+        temp_path = os.path.join(TEMP_DIR, unique_filename)
+
+        with open(temp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        try:
+            splitters = document_loader.doc_loader(temp_path)
+            vectorstore.add_documents(splitters)
+
+            response_data.append({
+                "original_filename": file.filename,
+                "chunks_count": len(splitters),
+            })
+
+        except Exception as e:
+            response_data.append({
+                "original_filename": file.filename,
+                "error": str(e),
+            })
+
+        finally:
+            os.remove(temp_path)
+
+    return {
+        "message": f"{len(files)} file(s) uploaded and processed.",
+        "results": response_data
+    }
