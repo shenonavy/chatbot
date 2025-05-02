@@ -1,9 +1,28 @@
+import React, { KeyboardEvent, useEffect, useRef } from "react";
 import { ChatType } from "@/enum";
 import { useChat } from "@/hook/use-chat";
 import { IChatResponse } from "@/models";
+import { Typewriter } from "react-simple-typewriter";
 
 export default function Home() {
+  const bottomRef = useRef<HTMLDivElement>(null);
   const { input, chats, isLoading, setInput, onSubmit } = useChat();
+
+  useEffect(() => {
+    const container = bottomRef.current;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [chats]);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && input?.trim() !== "") {
+      onSubmit();
+    }
+  };
 
   return (
     <div className="bg-gray-100 h-screen flex flex-col">
@@ -11,7 +30,7 @@ export default function Home() {
         Chatbot Assistant
       </div>
 
-      <div id="chat-window" className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={bottomRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {chats?.map((chat: IChatResponse, index: number) => (
           <div
             key={index}
@@ -26,7 +45,11 @@ export default function Home() {
                   : "bg-blue-500 text-white"
               }`}
             >
-              {chat.response}
+              <Typewriter
+                words={[chat?.response ?? ""]}
+                loop={1}
+                typeSpeed={20}
+              />
             </div>
           </div>
         ))}
@@ -48,6 +71,7 @@ export default function Home() {
           className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
           value={input}
           onInput={(e) => setInput(e.currentTarget.value)}
+          onKeyDown={handleKeyDown}
         />
         <button
           disabled={isLoading}
