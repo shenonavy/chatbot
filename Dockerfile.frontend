@@ -5,13 +5,13 @@ FROM node:18-slim
 WORKDIR /app
 
 # Copy package files
-COPY chatbot/package*.json ./
+COPY client/package*.json ./
 
 # Install dependencies
 RUN npm ci --legacy-peer-deps
 
 # Copy application code
-COPY chatbot/ ./
+COPY client/ ./
 
 # Build the Next.js application
 ENV NEXT_PUBLIC_CHATBOT_BASE_URL=http://localhost:8000/api
