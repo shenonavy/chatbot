@@ -13,6 +13,7 @@ import {
     DialogTitle,
 } from '@/components/atoms/dialog';
 import { Uploader } from '@/components';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -50,15 +51,29 @@ export default function Home() {
     return (
         <>
             <div ref={bottomRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+                {chats?.length === 0 && (
+                    <div className="flex justify-center">
+                        <p className="font-mono text-gray-700 p-4 rounded text-sm whitespace-pre-wrap text-center w-full md:w-1/2">
+                            👋 <br />
+                            Hi there! I&apos;m here to help with anything you need — whether it&apos;s answering
+                            questions, guiding you through features, or solving issues. Just type your message below,
+                            and I&apos;ll jump right in! ✨
+                        </p>
+                    </div>
+                )}
                 {chats?.map((chat: IChatResponse, index: number) => (
                     <div
                         key={index}
-                        className={`flex ${chat.type === ChatType.Agent ? 'justify-start' : 'justify-end'}`}
+                        className={cn('flex', {
+                            'justify-start': chat.type === ChatType.Agent,
+                            'justify-end': chat.type !== ChatType.Agent,
+                        })}
                     >
                         <div
-                            className={`p-3 rounded-lg max-w-xs ${
-                                chat.type === ChatType.Agent ? 'bg-gray-200 text-gray-900' : 'bg-blue-500 text-white'
-                            }`}
+                            className={cn('p-3 rounded-lg', {
+                                'bg-gray-200 text-gray-900': chat.type === ChatType.Agent,
+                                'bg-blue-500 text-white': chat.type !== ChatType.Agent,
+                            })}
                         >
                             <Typewriter words={[chat?.response ?? '']} loop={1} typeSpeed={20} />
                         </div>

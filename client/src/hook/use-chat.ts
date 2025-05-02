@@ -5,7 +5,7 @@ import { useMutation } from 'react-query';
 
 const executeChat = async (req: IChatRequest) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CHATBOT_BASE_URL}/chatbot`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_CHATBOT_BASE_URL}/rag`, {
             method: 'POST',
             body: JSON.stringify(req),
             headers: {

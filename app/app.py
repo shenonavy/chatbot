@@ -98,7 +98,7 @@ async def chatbot(req: ChatRequest):
         return response_data
     
 @app.post("/api/rag")
-async def simple_rag(req: ChatRequest):
+async def rag(req: ChatRequest):
     question = req.question
     logging.info(f"Question: {question}")
 
