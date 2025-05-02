@@ -1,11 +1,11 @@
-import { ChatType } from "@/enum";
+import { ChatType } from '@/enum';
 
 export interface IChatRequest {
-  question: string;
+    question: string;
 }
 
 export interface IChatResponse {
-  status: string;
-  response: string;
-  type?: ChatType;
+    status: string;
+    response: string;
+    type?: ChatType;
 }

@@ -1,4 +1,4 @@
 export enum ChatType {
-  Human,
-  Agent,
+    Human,
+    Agent,
 }
