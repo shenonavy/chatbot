@@ -1,4 +1,4 @@
-from xml.dom.minidom import Document
+from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 def splitter(docs: list[Document]):

@@ -4,9 +4,12 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
 from models.llm import get_llm
-from utils.prompt import get_prompt
+from utils import prompt as prompt_template
 from entity.chat_request import ChatRequest
+from database import vectorstore
 from logger import logging
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.runnables import RunnableMap
 import os
 
 load_dotenv()
@@ -40,6 +43,9 @@ logging.info("initialized LLM")
 parser = StrOutputParser()
 logging.info("initialized output parser")
 
+retriever = vectorstore.as_retriever()
+logging.info("initialized retriever")
+
 @app.get("/")
 async def index():
     response_data = {
@@ -61,7 +67,7 @@ async def chatbot(req: ChatRequest):
     }
 
     try:
-        prompt = get_prompt()
+        prompt = prompt_template.get_prompt()
         logging.info("Received Prompt Template")
 
         chain = prompt | llm | parser
@@ -77,6 +83,39 @@ async def chatbot(req: ChatRequest):
         history.extend([HumanMessage(content=question),
                         AIMessage(content=response)])
         
+        response_data["response"] = response
+        return response_data
+    except Exception as e:
+        logging.error(f"Error: {str(e)}")
+        response_data["response"] = str(e)
+        response_data["status"] = "fail"
+        return response_data
+    
+@app.post("/api/rag")
+async def simple_rag(req: ChatRequest):
+    question = req.question
+    logging.info(f"Question: {question}")
+
+    response_data = {
+        "status": "success",
+        "response": ""
+    }
+
+    try:
+        prompt = prompt_template.get_rag_prompt()
+        logging.info("Load prompt template")
+
+        qa_chain = create_stuff_documents_chain(llm, prompt)
+
+        rag_chain = RunnableMap({
+           "context": lambda x: retriever.get_relevant_documents(x["input"]),
+           "input": lambda x: x["input"]
+        }) | qa_chain
+        logging.info("Initialized retriever")
+
+        response = rag_chain.invoke({"input": question})
+        logging.info(f"Response: {response}")
+
         response_data["response"] = response
         return response_data
     except Exception as e:
