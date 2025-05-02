@@ -1,4 +1,4 @@
-# Simple Chatbot
+# Simple Chatbot with RAG
 
 ## Installation
 
