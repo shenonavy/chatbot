@@ -4,11 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
+from data import loader as document_loader
 from models.llm import get_llm
-from utils import prompt as prompt_template, loader as document_loader
-from entity.chat_request import ChatRequest
-from database import vectorstore
-from logger import logging
+from prompts import prompt as prompt_template
+from schemas.chat_request import ChatRequest
+from data.database import vectorstore
+from core.logger import logging
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.runnables import RunnableMap
 import shutil
