@@ -70,7 +70,7 @@ export default function Home() {
                         })}
                     >
                         <div
-                            className={cn('p-3 rounded-lg', {
+                            className={cn('p-3 rounded-lg max-w-xs', {
                                 'bg-gray-200 text-gray-900': chat.type === ChatType.Agent,
                                 'bg-blue-500 text-white': chat.type !== ChatType.Agent,
                             })}
