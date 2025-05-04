@@ -3,4 +3,5 @@ export enum ChatType {
     WEB_SEARCH = 'web_search',
     UNKNOWN = 'unknown',
     HUMAN = 'human',
+    AGENT = 'agent',
 }

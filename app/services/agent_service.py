@@ -9,15 +9,19 @@ persistent_memory = ConversationBufferMemory(memory_key="chat_history", return_m
 def _handle_agent_response(response) -> ResponseModel:
     if 'output' in response and 'intermediate_steps' in response:
         source_type = "unknown"
-        intermediate_steps = response['intermediate_steps']
+        intermediate_steps = response.get('intermediate_steps', [])
 
-        for action, _ in intermediate_steps:
-            if action.tool == "RAG Knowledge Base":
-                source_type = "knowledge_base"
-                break
-            elif action.tool == "DuckDuckGo Search":
-                source_type = "web_search"
-                break
+        if 'output' in response and intermediate_steps:
+            last_step = intermediate_steps[-1]
+            if isinstance(last_step, (list, tuple)) and len(last_step) >= 1:
+                last_action = last_step[0]
+                if hasattr(last_action, "tool"):
+                    if last_action.tool == "RAG Knowledge Base":
+                        source_type = "knowledge_base"
+                    elif last_action.tool == "DuckDuckGo Search":
+                        source_type = "web_search"
+                    elif last_action.tool == "Agent Base":
+                        source_type = "agent"
 
         response_model = ResponseModel(
             status="success",
@@ -28,21 +32,25 @@ def _handle_agent_response(response) -> ResponseModel:
     return ResponseModel(status="error", response="No valid response", source_type="unknown")
 
 def run_agent(llm, retriever, prompt_template, question: str):
-    rag_tool = get_rag_tool(llm, retriever, question)
-    search_tool = get_search_tool()
-
-    tools = [rag_tool, search_tool]
-
-    agent = create_react_agent(
-        tools=tools,
-        llm=llm,
-        prompt=prompt_template.get_agent_prompt(),
-    )
-
-    agent_executor = AgentExecutor(tools=tools, agent=agent, memory=persistent_memory, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True)
-
-    response = agent_executor.invoke({"input": question})
-
-    logging.info(f"Final result: {response}")
-
-    return _handle_agent_response(response)
+    try:
+        rag_tool = get_rag_tool(llm, retriever, question)
+        search_tool = get_search_tool()
+    
+        tools = [rag_tool, search_tool]
+    
+        agent = create_react_agent(
+            tools=tools,
+            llm=llm,
+            prompt=prompt_template.get_agent_prompt(),
+        )
+    
+        agent_executor = AgentExecutor(tools=tools, agent=agent, memory=persistent_memory, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True)
+    
+        response = agent_executor.invoke({"input": question})
+    
+        logging.info(f"Final result: {response}")
+    
+        return _handle_agent_response(response)
+    except Exception as e:
+        logging.error(f"Agent chain error: {str(e)}")
+        return ResponseModel(response=str(e), status="fail")

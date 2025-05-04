@@ -85,6 +85,8 @@ export const useChat = () => {
                 return 'Knowledge Base';
             case 'web_search':
                 return 'Web Search';
+            case 'agent':
+                return 'Agent';
             default:
                 return 'Unknown';
         }
