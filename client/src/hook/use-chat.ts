@@ -48,7 +48,7 @@ export const useChat = () => {
 
     const { mutate, isLoading } = useMutation((data: IChatRequest) => executeChat(data), {
         onSuccess: response => {
-            setChat(prev => [...prev, { type: ChatType.Agent, ...response }]);
+            setChat(prev => [...prev, response]);
         },
         onError: (error: unknown) => {
             console.error('Error occurred while executing chat:', error);
@@ -56,7 +56,7 @@ export const useChat = () => {
     });
 
     const onSubmit = () => {
-        setChat(prev => [...prev, { type: ChatType.Human, response: input, status: 'success' }]);
+        setChat(prev => [...prev, { source_type: ChatType.HUMAN, response: input, status: 'success' }]);
         mutate({ question: input });
         setInput('');
     };
@@ -79,6 +79,17 @@ export const useChat = () => {
         mutateUpload(formData);
     };
 
+    const sourceType = (type: string | undefined) => {
+        switch (type) {
+            case 'knowledge_base':
+                return 'Knowledge Base';
+            case 'web_search':
+                return 'Web Search';
+            default:
+                return 'Unknown';
+        }
+    };
+
     return {
         isLoading,
         uploading,
@@ -92,5 +103,6 @@ export const useChat = () => {
         handleUpload,
         handleDrop,
         handleRemove,
+        sourceType,
     };
 };

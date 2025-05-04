@@ -30,6 +30,7 @@ export default function Home() {
         handleDrop,
         handleRemove,
         handleUpload,
+        sourceType,
     } = useChat();
 
     useEffect(() => {
@@ -65,16 +66,17 @@ export default function Home() {
                     <div
                         key={index}
                         className={cn('flex', {
-                            'justify-start': chat.type === ChatType.Agent,
-                            'justify-end': chat.type !== ChatType.Agent,
+                            'justify-start': chat.source_type !== ChatType.HUMAN,
+                            'justify-end': chat.source_type === ChatType.HUMAN,
                         })}
                     >
                         <div
                             className={cn('p-3 rounded-lg max-w-xs', {
-                                'bg-gray-200 text-gray-900': chat.type === ChatType.Agent,
-                                'bg-blue-500 text-white': chat.type !== ChatType.Agent,
+                                'bg-gray-200 text-gray-900': chat.source_type !== ChatType.HUMAN,
+                                'bg-blue-500 text-white': chat.source_type === ChatType.HUMAN,
                             })}
                         >
+                            {chat.source_type !== ChatType.HUMAN && <p className='text-[10px] font-light text-gray-500 mb-1 uppercase tracking-wider'>{sourceType(chat.source_type )}</p>}
                             <Typewriter words={[chat?.response ?? '']} loop={1} typeSpeed={20} />
                         </div>
                     </div>

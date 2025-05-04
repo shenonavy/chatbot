@@ -7,5 +7,5 @@ export interface IChatRequest {
 export interface IChatResponse {
     status: string;
     response: string;
-    type?: ChatType;
+    source_type?: ChatType;
 }

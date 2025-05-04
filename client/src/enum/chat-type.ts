@@ -1,4 +1,6 @@
 export enum ChatType {
-    Human,
-    Agent,
+    KNOWLEDGE_BASE = 'knowledge_base',
+    WEB_SEARCH = 'web_search',
+    UNKNOWN = 'unknown',
+    HUMAN = 'human',
 }
