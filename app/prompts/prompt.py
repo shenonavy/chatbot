@@ -35,6 +35,9 @@ def get_agent_prompt():
 
           {tools}
 
+          Previous conversation:
+          {chat_history}
+
           Use the following format:
 
           Question: the input question you must answer

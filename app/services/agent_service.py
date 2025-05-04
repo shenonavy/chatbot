@@ -1,7 +1,10 @@
 from core.logger import logging
 from orchestrator.state_machine import get_rag_tool, get_search_tool
 from langchain.agents import AgentExecutor, create_react_agent
+from langchain.memory import ConversationBufferMemory
 from dto.response import ResponseModel
+
+persistent_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=False)
 
 def _handle_agent_response(response) -> ResponseModel:
     if 'output' in response and 'intermediate_steps' in response:
@@ -36,7 +39,7 @@ def run_agent(llm, retriever, prompt_template, question: str):
         prompt=prompt_template.get_agent_prompt(),
     )
 
-    agent_executor = AgentExecutor(tools=tools, agent=agent, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True)
+    agent_executor = AgentExecutor(tools=tools, agent=agent, memory=persistent_memory, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True)
 
     response = agent_executor.invoke({"input": question})
 

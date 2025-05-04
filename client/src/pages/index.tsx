@@ -34,18 +34,35 @@ export default function Home() {
     } = useChat();
 
     useEffect(() => {
-        const container = bottomRef.current;
-        if (container) {
-            container.scrollTo({
-                top: container.scrollHeight,
-                behavior: 'smooth',
-            });
-        }
+        scrollToBottom();
     }, [chats]);
 
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && input?.trim() !== '') {
             onSubmit();
+        }
+    };
+
+    const scrollToBottom = () => {
+        const container = bottomRef.current;
+        if (container) {
+            const scrollToBottom = () => {
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth',
+                });
+            };
+            const observer = new MutationObserver(() => {
+                scrollToBottom();
+            });
+            observer.observe(container, {
+                childList: true,
+                subtree: true,
+            });
+            scrollToBottom();
+            return () => {
+                observer.disconnect();
+            };
         }
     };
 
@@ -76,8 +93,17 @@ export default function Home() {
                                 'bg-blue-500 text-white': chat.source_type === ChatType.HUMAN,
                             })}
                         >
-                            {chat.source_type !== ChatType.HUMAN && <p className='text-[10px] font-light text-gray-500 mb-1 uppercase tracking-wider'>{sourceType(chat.source_type )}</p>}
-                            <Typewriter words={[chat?.response ?? '']} loop={1} typeSpeed={20} />
+                            {chat.source_type !== ChatType.HUMAN && (
+                                <p className="text-[10px] font-light text-gray-500 mb-1 uppercase tracking-wider">
+                                    {sourceType(chat.source_type)}
+                                </p>
+                            )}
+                            <Typewriter
+                                words={[chat?.response ?? '']}
+                                loop={1}
+                                typeSpeed={20}
+                                onType={() => scrollToBottom()}
+                            />
                         </div>
                     </div>
                 ))}
