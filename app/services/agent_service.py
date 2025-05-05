@@ -1,5 +1,5 @@
 from core.logger import logging
-from orchestrator.state_machine import get_rag_tool, get_search_tool
+from orchestrator.state_machine import get_custom_prompt_tool, get_rag_tool, get_search_tool
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.memory import ConversationBufferMemory
 from dto.response import ResponseModel
@@ -20,8 +20,8 @@ def _handle_agent_response(response) -> ResponseModel:
                         source_type = "knowledge_base"
                     elif last_action.tool == "DuckDuckGo Search":
                         source_type = "web_search"
-                    elif last_action.tool == "Agent Base":
-                        source_type = "agent"
+                    elif last_action.tool == "AI Assistant":
+                        source_type = "ai_assistant"
 
         response_model = ResponseModel(
             status="success",
@@ -31,12 +31,13 @@ def _handle_agent_response(response) -> ResponseModel:
         return response_model
     return ResponseModel(status="error", response="No valid response", source_type="unknown")
 
-def run_agent(llm, retriever, prompt_template, question: str):
+def run_agent(llm, parser, retriever, prompt_template, question: str):
     try:
         rag_tool = get_rag_tool(llm, retriever, question)
         search_tool = get_search_tool()
+        custom_tool = get_custom_prompt_tool(llm, parser, prompt_template, question)
     
-        tools = [rag_tool, search_tool]
+        tools = [rag_tool, search_tool, custom_tool]
     
         agent = create_react_agent(
             tools=tools,
@@ -44,7 +45,7 @@ def run_agent(llm, retriever, prompt_template, question: str):
             prompt=prompt_template.get_agent_prompt(),
         )
     
-        agent_executor = AgentExecutor(tools=tools, agent=agent, memory=persistent_memory, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True)
+        agent_executor = AgentExecutor(tools=tools, agent=agent, memory=persistent_memory, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True, max_iterations=10)
     
         response = agent_executor.invoke({"input": question})
     

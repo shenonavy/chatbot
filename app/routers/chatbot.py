@@ -31,6 +31,7 @@ async def rag(req: ChatRequest, request: Request):
 async def rag(req: ChatRequest, request: Request):
     response_model = run_agent(
         llm=request.app.state.llm,
+        parser=request.app.state.parser,
         retriever=request.app.state.retriever,
         prompt_template=prompt_template,
         question=req.question

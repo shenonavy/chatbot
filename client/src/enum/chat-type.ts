@@ -4,4 +4,5 @@ export enum ChatType {
     UNKNOWN = 'unknown',
     HUMAN = 'human',
     AGENT = 'agent',
+    AI_ASSISTANT = 'ai_assistant',
 }
