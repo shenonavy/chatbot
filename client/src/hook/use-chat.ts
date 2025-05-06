@@ -1,6 +1,6 @@
+import { KeyboardEvent, useState, useEffect, useRef } from 'react';
 import { ChatType } from '@/enum';
 import { IChatRequest, IChatResponse } from '@/models';
-import { useState } from 'react';
 import { useMutation } from 'react-query';
 
 const executeChat = async (req: IChatRequest) => {
@@ -33,10 +33,44 @@ const uploadDocs = async (formData: FormData) => {
 };
 
 export const useChat = () => {
+    const bottomRef = useRef<HTMLDivElement>(null);
     const [chats, setChat] = useState<IChatResponse[]>([]);
     const [input, setInput] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
     const [files, setFiles] = useState<File[]>([]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [chats]);
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter' && input?.trim() !== '') {
+            onSubmit();
+        }
+    };
+
+    const scrollToBottom = () => {
+        const container = bottomRef.current;
+        if (container) {
+            const scrollToBottom = () => {
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth',
+                });
+            };
+            const observer = new MutationObserver(() => {
+                scrollToBottom();
+            });
+            observer.observe(container, {
+                childList: true,
+                subtree: true,
+            });
+            scrollToBottom();
+            return () => {
+                observer.disconnect();
+            };
+        }
+    };
 
     const handleDrop = (acceptedFiles: File[]) => {
         setFiles(prev => [...prev, ...acceptedFiles]);
@@ -93,6 +127,7 @@ export const useChat = () => {
     };
 
     return {
+        bottomRef,
         isLoading,
         uploading,
         chats,
@@ -106,5 +141,7 @@ export const useChat = () => {
         handleDrop,
         handleRemove,
         sourceType,
+        handleKeyDown,
+        scrollToBottom,
     };
 };

@@ -1,4 +1,3 @@
-import React, { KeyboardEvent, useEffect, useRef } from 'react';
 import { ChatType } from '@/enum';
 import { useChat } from '@/hook/use-chat';
 import { IChatResponse } from '@/models';
@@ -16,8 +15,8 @@ import { Uploader } from '@/components';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-    const bottomRef = useRef<HTMLDivElement>(null);
     const {
+        bottomRef,
         input,
         chats,
         isLoading,
@@ -31,40 +30,9 @@ export default function Home() {
         handleRemove,
         handleUpload,
         sourceType,
+        handleKeyDown,
+        scrollToBottom,
     } = useChat();
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [chats]);
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && input?.trim() !== '') {
-            onSubmit();
-        }
-    };
-
-    const scrollToBottom = () => {
-        const container = bottomRef.current;
-        if (container) {
-            const scrollToBottom = () => {
-                container.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: 'smooth',
-                });
-            };
-            const observer = new MutationObserver(() => {
-                scrollToBottom();
-            });
-            observer.observe(container, {
-                childList: true,
-                subtree: true,
-            });
-            scrollToBottom();
-            return () => {
-                observer.disconnect();
-            };
-        }
-    };
 
     return (
         <>
